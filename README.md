@@ -4,9 +4,14 @@ Project Write-up for the course
 
 Background
 ========================================================
-Short desc
-Article ref
-Data download link
+The project task includes qualitative excercise classification.  
+
+ 
+
+The WLE(Weight Lifting Exercises) dataset is made available by the authors Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. of the paper "Qualitative Activity Recognition of Weight Lifting Exercises", Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
+The data is collected by using several tracking devices attached to the subjects. The subjects performed correct and incorrect weight lifting movements. The class feature in the dataset indicates the quality of the movement, with 5 classes, where only A indicates the correct movement.
+
 
 Cleaning the data
 ========================================================
@@ -82,11 +87,7 @@ delme<-data.frame(traindata[,-columncount], as.numeric(traindata[,columncount]))
 corclass<-cor(delme)[,columncount]
 corelated<-c(which(corclass > 0.05))
 traindata<-traindata[,corelated]
-traindata<-traindata[,corelated]
-```
-
-```
-## Error: undefined columns selected
+testdata<-testdata[,corelated]
 ```
 
 
@@ -122,17 +123,102 @@ We first look at the graphical information of a random subset of the data.
 
 
 ```r
-viz_index <- createDataPartition(y = traindata$classe, p=0.1,list=FALSE) 
-pairs(traindata[viz_index,c(1:9, 13)])
+viz_index <- createDataPartition(y = mtrain$classe, p=0.1,list=FALSE) 
+pairs(mtrain[viz_index,c(1:9, 13)])
 ```
 
 ![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
 
 We can identify that data is clustered, but some parameters are corelated. Random forest with principal component analysis would be a suitable machine learning algorithm for such data.
 
-#modRfCenterSc<-train(classe~.,method = "rf", data = mtrain,preprocess=c("center", "scale"))
-#modRfPca<-train(classe~.,method = "rf", data = mtrain,preprocess="pca")
-#forest1<-randomForest(classe ~., data=mtrain, method="pca")
-#preds<-predict(modFit, newdata=preptest)
-#confusionMatrix(mtest$classe, preds)
 
+```
+## Loading required package: randomForest
+## randomForest 4.6-7
+## Type rfNews() to see new features/changes/bug fixes.
+```
+
+
+
+```r
+forest1<-randomForest(classe ~., data=mtrain, method="pca")
+predicted<-predict(forest1, newdata=mtest[,-13])
+confusionMatrix(mtest$classe, predicted)
+```
+
+```
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1653    5    8    6    2
+##          B   24 1081   29    2    3
+##          C    0   16  996   14    0
+##          D    3    0   25  932    4
+##          E    0    9    4    8 1061
+## 
+## Overall Statistics
+##                                         
+##                Accuracy : 0.972         
+##                  95% CI : (0.968, 0.977)
+##     No Information Rate : 0.285         
+##     P-Value [Acc > NIR] : < 2e-16       
+##                                         
+##                   Kappa : 0.965         
+##  Mcnemar's Test P-Value : 1.31e-05      
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity             0.984    0.973    0.938    0.969    0.992
+## Specificity             0.995    0.988    0.994    0.993    0.996
+## Pos Pred Value          0.987    0.949    0.971    0.967    0.981
+## Neg Pred Value          0.994    0.994    0.986    0.994    0.998
+## Prevalence              0.285    0.189    0.180    0.163    0.182
+## Detection Rate          0.281    0.184    0.169    0.158    0.180
+## Detection Prevalence    0.284    0.194    0.174    0.164    0.184
+## Balanced Accuracy       0.989    0.980    0.966    0.981    0.994
+```
+
+
+
+```r
+forest2<-randomForest(classe ~., data=mtrain, method="center, scale")
+predicted<-predict(forest2, newdata=mtest[,-13])
+confusionMatrix(mtest$classe, predicted)
+```
+
+```
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1657    4    7    4    2
+##          B   25 1081   29    2    2
+##          C    0   18  993   14    1
+##          D    3    0   27  930    4
+##          E    0   11    3    8 1060
+## 
+## Overall Statistics
+##                                         
+##                Accuracy : 0.972         
+##                  95% CI : (0.968, 0.976)
+##     No Information Rate : 0.286         
+##     P-Value [Acc > NIR] : < 2e-16       
+##                                         
+##                   Kappa : 0.965         
+##  Mcnemar's Test P-Value : 8.8e-06       
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity             0.983    0.970    0.938    0.971    0.992
+## Specificity             0.996    0.988    0.993    0.993    0.995
+## Pos Pred Value          0.990    0.949    0.968    0.965    0.980
+## Neg Pred Value          0.993    0.993    0.986    0.994    0.998
+## Prevalence              0.286    0.189    0.180    0.163    0.182
+## Detection Rate          0.282    0.184    0.169    0.158    0.180
+## Detection Prevalence    0.284    0.194    0.174    0.164    0.184
+## Balanced Accuracy       0.990    0.979    0.965    0.982    0.994
+```
+With forest2 it appears the PCA is not essential (the algorithm performs slightly better without it) so only center and scale preprocessing methods are usef for the final prediction. 
