@@ -6,26 +6,19 @@ Project Write-up for the course
 
 At first the data is loaded, empty or NA strings are replaced with R NA.
     
-
-```r
+```{r Loading the data,message=FALSE, warning=FALSE,echo=TRUE, results='hide'}
 badEntries<-c("","NA", "#DIV/0!")
 traindata <- read.csv("pml-training.csv", na.strings=badEntries)
 testdata <- read.csv("pml-testing.csv", na.strings=badEntries)
 ```
 
-
-```r
+```{r Dimensions of the data, echo=TRUE ,results='hold'}
 dim(traindata)
-```
-
-```
-## [1] 19622   160
 ```
 The data that can be used for training is 19622 observations with 159 features and one reponse variable.
 
 We analyse how prevalent are the NA values in the training data.
-
-```r
+``` {r Identify empty columns, results='hide'}
 countVectNA<- function(x) {sum(is.na(x))}
 columnNA <- apply(traindata,2,countVectNA)
 keepColumns<-(columnNA==0)
@@ -33,12 +26,9 @@ keepColumns<-(columnNA==0)
 
 Since there are 160 features an efficient way to get an overview would be a simple plot.
 
-
-```r
+```{r Empty columns plot, fig.width=7, fig.height=5}
 plot(columnNA)
 ```
-
-![plot of chunk Empty columns plot](figure/Empty columns plot.png) 
 
 preptrain <- traindata[,keepColumns]
 preptest <- testdata[,keepColumns]
