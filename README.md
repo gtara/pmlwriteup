@@ -132,14 +132,6 @@ pairs(mtrain[viz_index,c(1:9, 13)])
 We can identify that data is clustered, but some parameters are corelated. Random forest with principal component analysis would be a suitable machine learning algorithm for such data.
 
 
-```
-## Loading required package: randomForest
-## randomForest 4.6-7
-## Type rfNews() to see new features/changes/bug fixes.
-```
-
-
-
 ```r
 forest1<-randomForest(classe ~., data=mtrain, method="pca")
 predicted<-predict(forest1, newdata=mtest[,-13])
